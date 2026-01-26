@@ -1,5 +1,5 @@
 const VISUALISATION_ID = "27380474";
-const API_KEY = "PASTE_YOUR_FLOURISH_API_KEY_HERE";
+const API_KEY = "QjDqiYcwNRvCwZLiIDj50O-fvzAyGcadaOG091tD52t0hul3TA1b5ZXLKoNCe2NI";
 
 const CSV_PATH = "./input_data.csv";
 
