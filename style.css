@@ -17,15 +17,9 @@ body {
   padding: 16px;
 }
 
+/* Top controls */
 .topbar {
   margin-bottom: 12px;
-}
-
-.controls {
-  display: flex;
-  gap: 12px;
-  align-items: end;
-  flex-wrap: wrap;
 }
 
 .control span {
@@ -50,29 +44,19 @@ select {
   background-repeat: no-repeat;
 }
 
-.btn {
-  font-family: "effra", sans-serif;
-  background-color: transparent;
-  border: 1px solid #a5a5a5;
-  border-radius: 0.75rem;
-  padding: 10px 14px;
-  cursor: pointer;
-}
-
-.btn:hover {
-  opacity: 0.9;
-}
-
+/* True side-by-side layout */
 .grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
   gap: 12px;
+  align-items: stretch;
 }
 
 .card {
   background-color: #F2EBE5;
   border-radius: 12px;
   padding: 12px;
+  flex: 1 1 0;
+  min-width: 420px; /* ensures side-by-side on normal screens */
 }
 
 .card-title {
@@ -98,9 +82,33 @@ select {
   opacity: 0.8;
 }
 
-@media (max-width: 900px) {
+/* Bottom download area */
+.footerbar {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn {
+  font-family: "effra", sans-serif;
+  background-color: transparent;
+  border: 1px solid #a5a5a5;
+  border-radius: 0.75rem;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+/* Only stack on genuinely small screens */
+@media (max-width: 920px) {
   .grid-2 {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+  .card {
+    min-width: 0;
   }
   select {
     width: 100%;

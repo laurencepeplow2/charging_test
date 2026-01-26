@@ -12,20 +12,17 @@
 
 <body id="main-code">
   <div class="main-content">
-    <div class="topbar">
-      <div class="controls">
-        <label class="control">
-          <span>Country</span>
-          <select id="countrySelect"></select>
-        </label>
 
-        <button id="downloadBtn" class="btn">Download data (CSV)</button>
-      </div>
+    <div class="topbar">
+      <label class="control">
+        <span>Country</span>
+        <select id="countrySelect"></select>
+      </label>
     </div>
 
     <div class="grid-2">
       <div class="card">
-        <div class="card-title">Charging points (stacked)</div>
+        <div class="card-title">Charging points (stacked) + BEV fleet (line)</div>
         <div id="network_graph" class="chart"></div>
       </div>
 
@@ -35,6 +32,11 @@
         <div id="timelapseHint" class="hint"></div>
       </div>
     </div>
+
+    <div class="footerbar">
+      <button id="downloadBtn" class="btn">Download data (CSV)</button>
+    </div>
+
   </div>
 
   <script src="./script.js"></script>

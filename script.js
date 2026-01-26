@@ -1,14 +1,12 @@
-
-
-const API_KEY = "QjDqiYcwNRvCwZLiIDj50O-fvzAyGcadaOG091tD52t0hul3TA1b5ZXLKoNCe2NI";
-
 const VISUALISATION_ID = "27380474";
+const API_KEY = "PASTE_YOUR_FLOURISH_API_KEY_HERE";
 
 const CSV_PATH = "./input_data.csv";
 
-// These must match your CSV header exactly:
+// Must match CSV headers exactly:
 const COL_PERIOD = "Period";
 const COL_COUNTRY = "Country";
+const COL_BEV = "BEV fleet";
 const COL_AC = "AC charging points";
 const COL_DC = "DC charging points";
 
@@ -21,7 +19,9 @@ const timelapseImg = document.getElementById("timelapseImg");
 const timelapseHint = document.getElementById("timelapseHint");
 
 function uniq(values) {
-  return Array.from(new Set(values)).filter(v => v !== undefined && v !== null && String(v).trim() !== "");
+  return Array.from(new Set(values))
+    .map(v => (v ?? "").toString().trim())
+    .filter(v => v !== "");
 }
 
 function rowsToCsv(rows, columns) {
@@ -36,36 +36,33 @@ function rowsToCsv(rows, columns) {
 }
 
 function setTimelapse(country) {
-  // Convention: ./timelapse/<Country>.gif e.g. ./timelapse/EU.gif
   const src = `./timelapse/${country}.gif`;
   timelapseImg.src = src;
-
   timelapseHint.textContent = `Showing: timelapse/${country}.gif`;
+
   timelapseImg.onerror = () => {
     timelapseHint.textContent = `Missing GIF: timelapse/${country}.gif`;
   };
 }
 
-async function ensureFlourishVis(filteredRows) {
-  // Pull base config so the template styling is preserved
+async function renderFlourish(filteredRows) {
   const configJson = await fetch(
     `https://public.flourish.studio/visualisation/${VISUALISATION_ID}/visualisation.json`
   ).then((res) => res.json());
 
-  // Bind stacked series: AC + DC
+  // IMPORTANT: BEV first (line), then AC/DC (columns), per Flourish combo behavior.
   const bindings = {
     data: {
       label: COL_PERIOD,
-      value: [COL_AC, COL_DC],
+      value: [COL_BEV, COL_AC, COL_DC],
       metadata: []
     }
   };
 
-  // Force stacked bars (and keep the rest from the template)
+  // Keep the template’s chart_type/etc. (so it stays “combo” if that’s how the template is set up)
+  // Only enforce stacking for the column series.
   const state = {
     ...configJson.state,
-    chart_type: "column_stacked",
-    aggregation_mode: "none",
     axes: {
       ...(configJson.state.axes || {}),
       stacking_mode: "stacked"
@@ -92,48 +89,37 @@ async function ensureFlourishVis(filteredRows) {
 }
 
 async function renderForCountry(country) {
-  const filtered = allRows.filter(r => String(r[COL_COUNTRY]) === String(country));
-
-  // Update Flourish
-  await ensureFlourishVis(filtered);
-
-  // Update GIF
+  const filtered = allRows.filter(r => (r[COL_COUNTRY] ?? "").toString() === country);
+  await renderFlourish(filtered);
   setTimelapse(country);
 }
 
 async function init() {
-  // Load CSV
   const csvText = await fetch(CSV_PATH).then(res => res.text());
   allRows = d3.csvParse(csvText);
 
-  // Basic validation
-  const cols = allRows.columns || [];
-  const required = [COL_PERIOD, COL_COUNTRY, COL_AC, COL_DC];
-  const missing = required.filter(c => !cols.includes(c));
+  const required = [COL_PERIOD, COL_COUNTRY, COL_BEV, COL_AC, COL_DC];
+  const missing = required.filter(c => !(allRows.columns || []).includes(c));
   if (missing.length) {
-    console.error("Missing required columns:", missing);
     document.getElementById("network_graph").innerHTML =
-      `<p style="font-family:sans-serif">CSV is missing columns: ${missing.join(", ")}</p>`;
+      `<p style="font-family:sans-serif">CSV missing columns: ${missing.join(", ")}</p>`;
     return;
   }
 
-  // Populate country filter
   const countries = uniq(allRows.map(r => r[COL_COUNTRY])).sort();
   countrySelect.innerHTML = countries.map(c => `<option value="${c}">${c}</option>`).join("");
 
-  // Default = first country
   const defaultCountry = countries[0] || "EU";
   countrySelect.value = defaultCountry;
 
-  // Hook up filter change (applies to entire dashboard)
   countrySelect.addEventListener("change", async () => {
     await renderForCountry(countrySelect.value);
   });
 
-  // Download button (downloads FILTERED data only; excludes GIF)
+  // Download filtered data only (no GIF)
   downloadBtn.addEventListener("click", () => {
     const country = countrySelect.value;
-    const filtered = allRows.filter(r => String(r[COL_COUNTRY]) === String(country));
+    const filtered = allRows.filter(r => (r[COL_COUNTRY] ?? "").toString() === country);
 
     const csvOut = rowsToCsv(filtered, allRows.columns);
     const blob = new Blob([csvOut], { type: "text/csv;charset=utf-8;" });
@@ -148,7 +134,6 @@ async function init() {
     URL.revokeObjectURL(url);
   });
 
-  // First render
   await renderForCountry(defaultCountry);
 }
 
