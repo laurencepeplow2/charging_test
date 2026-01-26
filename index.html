@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Charging dashboard</title>
+
+  <script src="https://cdn.flourish.rocks/flourish-live-v5.min.js"></script>
+  <script src="https://d3js.org/d3-dsv.v1.min.js"></script>
+
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 16px; }
+    .section { margin-bottom: 24px; }
+    .title { font-size: 18px; font-weight: 600; margin: 0 0 8px; }
+    #network_graph { width: 100%; min-height: 520px; }
+    #timelapse { width: 100%; height: auto; display: block; border-radius: 8px; }
+  </style>
+</head>
+
+<body>
+  <div class="section">
+    <div class="title">network_graph</div>
+    <div id="network_graph"></div>
+  </div>
+
+  <div class="section">
+    <div class="title">timelapse</div>
+    <!-- Put timelapse.gif in the same folder as this HTML -->
+    <img id="timelapse" src="./timelapse.gif" alt="Timelapse" />
+  </div>
+
+  <script src="./script.js"></script>
+</body>
+</html>
