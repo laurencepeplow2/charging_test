@@ -2,30 +2,39 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Charging dashboard</title>
+  <title>Charging dashboard (trial)</title>
+
+  <link rel="stylesheet" href="./styles.css" />
 
   <script src="https://cdn.flourish.rocks/flourish-live-v5.min.js"></script>
   <script src="https://d3js.org/d3-dsv.v1.min.js"></script>
-
-  <style>
-    body { font-family: sans-serif; margin: 0; padding: 16px; }
-    .section { margin-bottom: 24px; }
-    .title { font-size: 18px; font-weight: 600; margin: 0 0 8px; }
-    #network_graph { width: 100%; min-height: 520px; }
-    #timelapse { width: 100%; height: auto; display: block; border-radius: 8px; }
-  </style>
 </head>
 
-<body>
-  <div class="section">
-    <div class="title">network_graph</div>
-    <div id="network_graph"></div>
-  </div>
+<body id="main-code">
+  <div class="main-content">
+    <div class="topbar">
+      <div class="controls">
+        <label class="control">
+          <span>Country</span>
+          <select id="countrySelect"></select>
+        </label>
 
-  <div class="section">
-    <div class="title">timelapse</div>
-    <!-- Put timelapse.gif in the same folder as this HTML -->
-    <img id="timelapse" src="./timelapse.gif" alt="Timelapse" />
+        <button id="downloadBtn" class="btn">Download data (CSV)</button>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Charging points (stacked)</div>
+        <div id="network_graph" class="chart"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Timelapse</div>
+        <img id="timelapseImg" class="timelapse" src="" alt="Timelapse" />
+        <div id="timelapseHint" class="hint"></div>
+      </div>
+    </div>
   </div>
 
   <script src="./script.js"></script>

@@ -1,0 +1,108 @@
+@import url("https://use.typekit.net/pnq5gyb.css");
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  font-family: "effra", sans-serif;
+  font-weight: 400;
+}
+
+#main-code,
+.main-content {
+  background-color: #F8F3EF;
+}
+
+.main-content {
+  padding: 16px;
+}
+
+.topbar {
+  margin-bottom: 12px;
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.control span {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+select {
+  width: 220px;
+  background-color: #fff;
+  border: 1px solid #a5a5a5;
+  min-height: 42px;
+  border-radius: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 1rem;
+  font-family: "effra", sans-serif;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='%234D45FF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-size: 24px;
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+}
+
+.btn {
+  font-family: "effra", sans-serif;
+  background-color: transparent;
+  border: 1px solid #a5a5a5;
+  border-radius: 0.75rem;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.card {
+  background-color: #F2EBE5;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.card-title {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.chart {
+  width: 100%;
+  min-height: 520px;
+}
+
+.timelapse {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
+}
+
+.hint {
+  font-size: 13px;
+  margin-top: 8px;
+  opacity: 0.8;
+}
+
+@media (max-width: 900px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+  select {
+    width: 100%;
+  }
+}
