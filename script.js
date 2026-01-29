@@ -1,35 +1,33 @@
 
 const API_KEY = "QjDqiYcwNRvCwZLiIDj50O-fvzAyGcadaOG091tD52t0hul3TA1b5ZXLKoNCe2NI";
 
-// Chart 1 template (existing)
-const VISUALISATION_ID_1 = "27380474";
-// Chart 2 template (new)
-const VISUALISATION_ID_2 = "27423802";
+// ----- Chart 1 (filtered) -----
+const VISUALISATION_ID = "27380474";
 
-// ⚠️ Visible in browser if you put it here
-const API_KEY = "PASTE_YOUR_FLOURISH_API_KEY_HERE";
+// ----- Chart 2 (AFIR, unfiltered) -----
+const AFIR_VISUALISATION_ID = "27423802";
 
-const CSV_PATH_1 = "./input_data.csv";
-const CSV_PATH_2 = "./power_data.csv";
+const CSV_PATH = "./input_data.csv";
+const AFIR_CSV_PATH = "./AFIR_compliance.csv";
 
-// CSV 1 headers (time series)
+// Must match input_data.csv headers exactly:
 const COL_PERIOD = "Period";
 const COL_COUNTRY = "Country";
 const COL_BEV = "BEV fleet";
 const COL_AC = "AC charging points";
 const COL_DC = "DC charging points";
 
-// CSV 2 headers (power vs target)
-const COL_COUNTRY_2 = "Country";
-const COL_TARGET = "Target 2025";
-const COL_POWER = "Total charging power";
-const COL_AREA = "Area";
+// Must match AFIR_compliance.csv headers exactly:
+const AFIR_COL_COUNTRY = "Country";
+const AFIR_COL_TARGET = "Target 2025";
+const AFIR_COL_TOTAL = "Total charging power";
+const AFIR_COL_AREA = "Area";
 
-let allRows1 = [];
-let allRows2 = [];
+let allRows = [];
+let afirRows = [];
 
-let vis1 = null;
-let vis2 = null;
+let vis = null;        // filtered chart
+let afirVis = null;    // AFIR chart
 
 const countrySelect = document.getElementById("countrySelect");
 const downloadBtn = document.getElementById("downloadBtn");
@@ -57,108 +55,108 @@ function setTimelapse(country) {
   const src = `./timelapse/${country}.gif`;
   timelapseImg.src = src;
   timelapseHint.textContent = `Showing: timelapse/${country}.gif`;
+
   timelapseImg.onerror = () => {
     timelapseHint.textContent = `Missing GIF: timelapse/${country}.gif`;
   };
 }
 
-async function renderChart1(filteredRows) {
+async function renderFilteredFlourish(filteredRows) {
   const configJson = await fetch(
-    `https://public.flourish.studio/visualisation/${VISUALISATION_ID_1}/visualisation.json`
-  ).then(res => res.json());
+    `https://public.flourish.studio/visualisation/${VISUALISATION_ID}/visualisation.json`
+  ).then((res) => res.json());
 
-  // BEV first (line), AC/DC next (stacked columns)
+  // BEV first (line), then AC/DC (stacked columns)
   const bindings = {
-    data: { label: COL_PERIOD, value: [COL_BEV, COL_AC, COL_DC], metadata: [] }
+    data: {
+      label: COL_PERIOD,
+      value: [COL_BEV, COL_AC, COL_DC],
+      metadata: []
+    }
   };
 
   const state = {
     ...configJson.state,
-    axes: { ...(configJson.state.axes || {}), stacking_mode: "stacked" }
+    axes: {
+      ...(configJson.state.axes || {}),
+      stacking_mode: "stacked"
+    }
   };
 
-  if (!vis1) {
-    vis1 = new Flourish.Live({
+  if (!vis) {
+    vis = new Flourish.Live({
       container: "#network_graph",
       api_key: API_KEY,
-      base_visualisation_id: VISUALISATION_ID_1,
+      base_visualisation_id: VISUALISATION_ID,
       base_visualisation_data_format: "object",
       data: { data: filteredRows },
       bindings,
       state
     });
   } else {
-    vis1.update({ data: { data: filteredRows }, bindings, state });
-  }
-}
-
-async function renderChart2() {
-  const configJson = await fetch(
-    `https://public.flourish.studio/visualisation/${VISUALISATION_ID_2}/visualisation.json`
-  ).then(res => res.json());
-
-  // Country as label, two values (target vs actual power). Area as metadata (kept for tooltip / legend if template uses it)
-  const bindings = {
-    data: { label: COL_COUNTRY_2, value: [COL_TARGET, COL_POWER], metadata: [COL_AREA] }
-  };
-
-  // Mostly keep template state as-is (so the chart behaves like your Flourish design)
-  const state = configJson.state;
-
-  if (!vis2) {
-    vis2 = new Flourish.Live({
-      container: "#power_chart",
-      api_key: API_KEY,
-      base_visualisation_id: VISUALISATION_ID_2,
-      base_visualisation_data_format: "object",
-      data: { data: allRows2 },
+    vis.update({
+      data: { data: filteredRows },
       bindings,
       state
     });
+  }
+}
+
+async function renderAfirChart() {
+  const configJson = await fetch(
+    `https://public.flourish.studio/visualisation/${AFIR_VISUALISATION_ID}/visualisation.json`
+  ).then((res) => res.json());
+
+  // Basic binding: Country on axis, 2 measures as series; keep Area as metadata for tooltips/colouring if template uses it
+  const bindings = {
+    data: {
+      label: AFIR_COL_COUNTRY,
+      value: [AFIR_COL_TARGET, AFIR_COL_TOTAL],
+      metadata: [AFIR_COL_AREA]
+    }
+  };
+
+  if (!afirVis) {
+    afirVis = new Flourish.Live({
+      container: "#afir_chart",
+      api_key: API_KEY,
+      base_visualisation_id: AFIR_VISUALISATION_ID,
+      base_visualisation_data_format: "object",
+      data: { data: afirRows },
+      bindings,
+      state: configJson.state
+    });
   } else {
-    vis2.update({ data: { data: allRows2 }, bindings, state });
+    afirVis.update({
+      data: { data: afirRows },
+      bindings,
+      state: configJson.state
+    });
   }
 }
 
 async function renderForCountry(country) {
-  const filtered1 = allRows1.filter(r => (r[COL_COUNTRY] ?? "").toString() === country);
-  await renderChart1(filtered1);
+  const filtered = allRows.filter(r => (r[COL_COUNTRY] ?? "").toString() === country);
+  await renderFilteredFlourish(filtered);
   setTimelapse(country);
-
-  // Chart 2 is an overview table by country, so it does NOT get filtered by the global country selector.
-  // (If you later want it filtered by Area or something else, we can add another global filter.)
 }
 
 async function init() {
-  // Load both CSVs
-  const csvText1 = await fetch(CSV_PATH_1).then(res => res.text());
-  allRows1 = d3.csvParse(csvText1);
+  // Load main CSV (filtered chart + gif)
+  const csvText = await fetch(CSV_PATH).then(res => res.text());
+  allRows = d3.csvParse(csvText);
 
-  const csvText2 = await fetch(CSV_PATH_2).then(res => res.text());
-  allRows2 = d3.csvParse(csvText2);
-
-  // Validate CSV 1 columns
-  const required1 = [COL_PERIOD, COL_COUNTRY, COL_BEV, COL_AC, COL_DC];
-  const missing1 = required1.filter(c => !(allRows1.columns || []).includes(c));
-  if (missing1.length) {
+  const required = [COL_PERIOD, COL_COUNTRY, COL_BEV, COL_AC, COL_DC];
+  const missing = required.filter(c => !(allRows.columns || []).includes(c));
+  if (missing.length) {
     document.getElementById("network_graph").innerHTML =
-      `<p style="font-family:sans-serif">input_data.csv missing columns: ${missing1.join(", ")}</p>`;
+      `<p style="font-family:sans-serif">input_data.csv missing columns: ${missing.join(", ")}</p>`;
     return;
   }
 
-  // Validate CSV 2 columns
-  const required2 = [COL_COUNTRY_2, COL_TARGET, COL_POWER, COL_AREA];
-  const missing2 = required2.filter(c => !(allRows2.columns || []).includes(c));
-  if (missing2.length) {
-    document.getElementById("power_chart").innerHTML =
-      `<p style="font-family:sans-serif">power_data.csv missing columns: ${missing2.join(", ")}</p>`;
-    return;
-  }
-
-  // Populate country selector from CSV 1 (time series)
-  const countries = uniq(allRows1.map(r => r[COL_COUNTRY])).sort();
+  // Populate global country filter
+  const countries = uniq(allRows.map(r => r[COL_COUNTRY])).sort();
   countrySelect.innerHTML = countries.map(c => `<option value="${c}">${c}</option>`).join("");
-
   const defaultCountry = countries[0] || "EU";
   countrySelect.value = defaultCountry;
 
@@ -166,31 +164,38 @@ async function init() {
     await renderForCountry(countrySelect.value);
   });
 
-  // Render chart 2 once
-  await renderChart2();
-
-  // Download ZIP (filtered time-series + full power table; excludes GIF)
-  downloadBtn.addEventListener("click", async () => {
+  // Download filtered main data only (no GIF, no AFIR)
+  downloadBtn.addEventListener("click", () => {
     const country = countrySelect.value;
-    const filtered1 = allRows1.filter(r => (r[COL_COUNTRY] ?? "").toString() === country);
+    const filtered = allRows.filter(r => (r[COL_COUNTRY] ?? "").toString() === country);
 
-    const zip = new JSZip();
-    zip.file(`charging_timeseries_${country}.csv`, rowsToCsv(filtered1, allRows1.columns));
-    zip.file(`charging_power_by_country.csv`, rowsToCsv(allRows2, allRows2.columns));
-
-    const blob = await zip.generateAsync({ type: "blob" });
+    const csvOut = rowsToCsv(filtered, allRows.columns);
+    const blob = new Blob([csvOut], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = `charging_dashboard_data_${country}.zip`;
+    a.download = `charging_data_${country}.csv`;
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
   });
 
-  // First render for default country
+  // Load AFIR CSV (unfiltered)
+  const afirText = await fetch(AFIR_CSV_PATH).then(res => res.text());
+  afirRows = d3.csvParse(afirText);
+
+  const afirRequired = [AFIR_COL_COUNTRY, AFIR_COL_TARGET, AFIR_COL_TOTAL, AFIR_COL_AREA];
+  const afirMissing = afirRequired.filter(c => !(afirRows.columns || []).includes(c));
+  if (afirMissing.length) {
+    document.getElementById("afir_chart").innerHTML =
+      `<p style="font-family:sans-serif">AFIR_compliance.csv missing columns: ${afirMissing.join(", ")}</p>`;
+  } else {
+    await renderAfirChart();
+  }
+
+  // First render of filtered row
   await renderForCountry(defaultCountry);
 }
 
