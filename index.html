@@ -13,6 +13,7 @@
 <body id="main-code">
   <div class="main-content">
 
+    <!-- Header -->
     <div class="topbar">
       <label class="control">
         <span>Country</span>
@@ -20,8 +21,8 @@
       </label>
     </div>
 
-    <!-- Row 1: filtered Flourish + filtered GIF -->
-    <div class="grid-2">
+    <!-- 2x2 grid that fits the screen -->
+    <div class="dash-grid">
       <div class="card">
         <div class="card-title">Charging points (stacked) + BEV fleet (line)</div>
         <div id="network_graph" class="chart"></div>
@@ -29,17 +30,24 @@
 
       <div class="card">
         <div class="card-title">Timelapse</div>
-        <img id="timelapseImg" class="timelapse" src="" alt="Timelapse" />
+        <div class="mediaWrap">
+          <img id="timelapseImg" class="timelapse" src="" alt="Timelapse" />
+        </div>
         <div id="timelapseHint" class="hint"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">AFIR compliance</div>
+        <div id="afir_chart" class="chart"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">TEN-T historic coverage</div>
+        <div id="tent_chart" class="chart"></div>
       </div>
     </div>
 
-    <!-- Row 2: NEW unfiltered Flourish chart -->
-    <div class="card card-full">
-      <div class="card-title">AFIR compliance</div>
-      <div id="afir_chart" class="chart"></div>
-    </div>
-
+    <!-- Footer -->
     <div class="footerbar">
       <button id="downloadBtn" class="btn">Download data (CSV)</button>
     </div>

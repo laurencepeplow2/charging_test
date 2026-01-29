@@ -1,38 +1,45 @@
 
 const API_KEY = "QjDqiYcwNRvCwZLiIDj50O-fvzAyGcadaOG091tD52t0hul3TA1b5ZXLKoNCe2NI";
 
-// ----- Chart 1 (filtered) -----
-const VISUALISATION_ID = "27380474";
+// ----- Flourish templates -----
+const FILTERED_VISUALISATION_ID = "27380474"; // combo chart template (BEV line + bars)
+const AFIR_VISUALISATION_ID = "27423802";     // AFIR chart template
+const TENT_VISUALISATION_ID = "27424153";     // TEN-T chart template
 
-// ----- Chart 2 (AFIR, unfiltered) -----
-const AFIR_VISUALISATION_ID = "27423802";
 
-const CSV_PATH = "./input_data.csv";
+// ----- CSV files (in repo root) -----
+const MAIN_CSV_PATH = "./input_data.csv";
 const AFIR_CSV_PATH = "./AFIR_compliance.csv";
+const TENT_CSV_PATH = "./TenT_historic.csv";
 
-// Must match input_data.csv headers exactly:
+// ----- input_data.csv columns -----
 const COL_PERIOD = "Period";
 const COL_COUNTRY = "Country";
 const COL_BEV = "BEV fleet";
 const COL_AC = "AC charging points";
 const COL_DC = "DC charging points";
 
-// Must match AFIR_compliance.csv headers exactly:
+// ----- AFIR_compliance.csv columns -----
 const AFIR_COL_COUNTRY = "Country";
 const AFIR_COL_TARGET = "Target 2025";
 const AFIR_COL_TOTAL = "Total charging power";
 const AFIR_COL_AREA = "Area";
 
-let allRows = [];
-let afirRows = [];
-
-let vis = null;        // filtered chart
-let afirVis = null;    // AFIR chart
-
+// DOM
 const countrySelect = document.getElementById("countrySelect");
 const downloadBtn = document.getElementById("downloadBtn");
 const timelapseImg = document.getElementById("timelapseImg");
 const timelapseHint = document.getElementById("timelapseHint");
+
+// Data
+let mainRows = [];
+let afirRows = [];
+let tentRows = [];
+
+// Flourish Live instances
+let filteredVis = null;
+let afirVis = null;
+let tentVis = null;
 
 function uniq(values) {
   return Array.from(new Set(values))
@@ -52,6 +59,7 @@ function rowsToCsv(rows, columns) {
 }
 
 function setTimelapse(country) {
+  // Convention: timelapse/<Country>.gif (e.g. timelapse/EU.gif)
   const src = `./timelapse/${country}.gif`;
   timelapseImg.src = src;
   timelapseHint.textContent = `Showing: timelapse/${country}.gif`;
@@ -61,12 +69,13 @@ function setTimelapse(country) {
   };
 }
 
-async function renderFilteredFlourish(filteredRows) {
+async function renderFilteredChart(filteredRows) {
   const configJson = await fetch(
-    `https://public.flourish.studio/visualisation/${VISUALISATION_ID}/visualisation.json`
-  ).then((res) => res.json());
+    `https://public.flourish.studio/visualisation/${FILTERED_VISUALISATION_ID}/visualisation.json`
+  ).then(res => res.json());
 
-  // BEV first (line), then AC/DC (stacked columns)
+  // IMPORTANT ORDER:
+  // BEV first (line), then AC/DC (stacked columns) — relies on your template being a combo chart.
   const bindings = {
     data: {
       label: COL_PERIOD,
@@ -75,6 +84,7 @@ async function renderFilteredFlourish(filteredRows) {
     }
   };
 
+  // Keep template settings; just enforce stacking for column series.
   const state = {
     ...configJson.state,
     axes: {
@@ -83,18 +93,18 @@ async function renderFilteredFlourish(filteredRows) {
     }
   };
 
-  if (!vis) {
-    vis = new Flourish.Live({
+  if (!filteredVis) {
+    filteredVis = new Flourish.Live({
       container: "#network_graph",
       api_key: API_KEY,
-      base_visualisation_id: VISUALISATION_ID,
+      base_visualisation_id: FILTERED_VISUALISATION_ID,
       base_visualisation_data_format: "object",
       data: { data: filteredRows },
       bindings,
       state
     });
   } else {
-    vis.update({
+    filteredVis.update({
       data: { data: filteredRows },
       bindings,
       state
@@ -105,9 +115,8 @@ async function renderFilteredFlourish(filteredRows) {
 async function renderAfirChart() {
   const configJson = await fetch(
     `https://public.flourish.studio/visualisation/${AFIR_VISUALISATION_ID}/visualisation.json`
-  ).then((res) => res.json());
+  ).then(res => res.json());
 
-  // Basic binding: Country on axis, 2 measures as series; keep Area as metadata for tooltips/colouring if template uses it
   const bindings = {
     data: {
       label: AFIR_COL_COUNTRY,
@@ -135,27 +144,87 @@ async function renderAfirChart() {
   }
 }
 
+function normaliseTentLabelColumn(rows) {
+  // If the first header is blank, d3.csvParse will use "" as the column name.
+  // We'll copy it to a safe name "__label" and bind to that instead.
+  const cols = rows.columns || [];
+  if (!cols.length) return { rows, labelCol: null, valueCols: [] };
+
+  const first = cols[0];
+  let labelCol = first;
+
+  if (first === "") {
+    labelCol = "__label";
+    rows.forEach(r => {
+      r[labelCol] = r[""];
+    });
+    // Keep original "" column as-is; just bind to __label.
+  }
+
+  const valueCols = cols.slice(1);
+  return { rows, labelCol, valueCols };
+}
+
+async function renderTentChart() {
+  const configJson = await fetch(
+    `https://public.flourish.studio/visualisation/${TENT_VISUALISATION_ID}/visualisation.json`
+  ).then(res => res.json());
+
+  const { rows, labelCol, valueCols } = normaliseTentLabelColumn(tentRows);
+
+  if (!labelCol || valueCols.length < 1) {
+    document.getElementById("tent_chart").innerHTML =
+      "<p style='font-family:sans-serif'>TenT_historic.csv needs a label column and at least one series column.</p>";
+    return;
+  }
+
+  const bindings = {
+    data: {
+      label: labelCol,
+      value: valueCols,
+      metadata: []
+    }
+  };
+
+  if (!tentVis) {
+    tentVis = new Flourish.Live({
+      container: "#tent_chart",
+      api_key: API_KEY,
+      base_visualisation_id: TENT_VISUALISATION_ID,
+      base_visualisation_data_format: "object",
+      data: { data: rows },
+      bindings,
+      state: configJson.state
+    });
+  } else {
+    tentVis.update({
+      data: { data: rows },
+      bindings,
+      state: configJson.state
+    });
+  }
+}
+
 async function renderForCountry(country) {
-  const filtered = allRows.filter(r => (r[COL_COUNTRY] ?? "").toString() === country);
-  await renderFilteredFlourish(filtered);
+  const filtered = mainRows.filter(r => (r[COL_COUNTRY] ?? "").toString() === country);
+  await renderFilteredChart(filtered);
   setTimelapse(country);
 }
 
 async function init() {
-  // Load main CSV (filtered chart + gif)
-  const csvText = await fetch(CSV_PATH).then(res => res.text());
-  allRows = d3.csvParse(csvText);
+  // ---- Load main CSV (filtered chart + gif) ----
+  const mainText = await fetch(MAIN_CSV_PATH).then(res => res.text());
+  mainRows = d3.csvParse(mainText);
 
-  const required = [COL_PERIOD, COL_COUNTRY, COL_BEV, COL_AC, COL_DC];
-  const missing = required.filter(c => !(allRows.columns || []).includes(c));
-  if (missing.length) {
+  const mainRequired = [COL_PERIOD, COL_COUNTRY, COL_BEV, COL_AC, COL_DC];
+  const mainMissing = mainRequired.filter(c => !(mainRows.columns || []).includes(c));
+  if (mainMissing.length) {
     document.getElementById("network_graph").innerHTML =
-      `<p style="font-family:sans-serif">input_data.csv missing columns: ${missing.join(", ")}</p>`;
+      `<p style="font-family:sans-serif">input_data.csv missing columns: ${mainMissing.join(", ")}</p>`;
     return;
   }
 
-  // Populate global country filter
-  const countries = uniq(allRows.map(r => r[COL_COUNTRY])).sort();
+  const countries = uniq(mainRows.map(r => r[COL_COUNTRY])).sort();
   countrySelect.innerHTML = countries.map(c => `<option value="${c}">${c}</option>`).join("");
   const defaultCountry = countries[0] || "EU";
   countrySelect.value = defaultCountry;
@@ -164,12 +233,11 @@ async function init() {
     await renderForCountry(countrySelect.value);
   });
 
-  // Download filtered main data only (no GIF, no AFIR)
   downloadBtn.addEventListener("click", () => {
     const country = countrySelect.value;
-    const filtered = allRows.filter(r => (r[COL_COUNTRY] ?? "").toString() === country);
+    const filtered = mainRows.filter(r => (r[COL_COUNTRY] ?? "").toString() === country);
 
-    const csvOut = rowsToCsv(filtered, allRows.columns);
+    const csvOut = rowsToCsv(filtered, mainRows.columns);
     const blob = new Blob([csvOut], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
 
@@ -182,7 +250,7 @@ async function init() {
     URL.revokeObjectURL(url);
   });
 
-  // Load AFIR CSV (unfiltered)
+  // ---- Load AFIR CSV (unfiltered) ----
   const afirText = await fetch(AFIR_CSV_PATH).then(res => res.text());
   afirRows = d3.csvParse(afirText);
 
@@ -195,7 +263,18 @@ async function init() {
     await renderAfirChart();
   }
 
-  // First render of filtered row
+  // ---- Load TEN-T CSV (unfiltered) ----
+  const tentText = await fetch(TENT_CSV_PATH).then(res => res.text());
+  tentRows = d3.csvParse(tentText);
+
+  if (!(tentRows.columns || []).length) {
+    document.getElementById("tent_chart").innerHTML =
+      "<p style='font-family:sans-serif'>TenT_historic.csv could not be parsed.</p>";
+  } else {
+    await renderTentChart();
+  }
+
+  // ---- First render for filtered components ----
   await renderForCountry(defaultCountry);
 }
 
