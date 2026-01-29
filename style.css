@@ -17,10 +17,7 @@ body {
   padding: 16px;
 }
 
-/* Top controls */
-.topbar {
-  margin-bottom: 12px;
-}
+.topbar { margin-bottom: 12px; }
 
 .control span {
   display: block;
@@ -44,19 +41,25 @@ select {
   background-repeat: no-repeat;
 }
 
-/* True side-by-side layout */
 .grid-2 {
   display: flex;
   gap: 12px;
   align-items: stretch;
 }
 
+.grid-1 {
+  margin-top: 12px;
+}
+
 .card {
   background-color: #F2EBE5;
   border-radius: 12px;
   padding: 12px;
+}
+
+.grid-2 .card {
   flex: 1 1 0;
-  min-width: 420px; /* ensures side-by-side on normal screens */
+  min-width: 420px;
 }
 
 .card-title {
@@ -82,7 +85,6 @@ select {
   opacity: 0.8;
 }
 
-/* Bottom download area */
 .footerbar {
   margin-top: 14px;
   display: flex;
@@ -98,19 +100,8 @@ select {
   cursor: pointer;
 }
 
-.btn:hover {
-  opacity: 0.9;
-}
-
-/* Only stack on genuinely small screens */
 @media (max-width: 920px) {
-  .grid-2 {
-    flex-direction: column;
-  }
-  .card {
-    min-width: 0;
-  }
-  select {
-    width: 100%;
-  }
+  .grid-2 { flex-direction: column; }
+  .grid-2 .card { min-width: 0; }
+  select { width: 100%; }
 }
