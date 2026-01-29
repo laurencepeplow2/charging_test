@@ -16,20 +16,24 @@
     <header class="header">
       <h1 class="page-title">Progress Report for TenT &amp; AFIR Charging Targets</h1>
 
-      <div class="filterRow">
-        <label class="filterLabel" for="countrySelect">Country</label>
-        <select id="countrySelect" class="countrySelect"></select>
+      <div class="headerRow">
+        <div class="filterRow">
+          <label class="filterLabel" for="countrySelect">Country</label>
+          <select id="countrySelect" class="countrySelect"></select>
+        </div>
+
+        <button id="downloadBtn" class="btn">Download data (CSV)</button>
       </div>
     </header>
 
     <main class="dashboard">
-      <!-- LEFT (35%): Map / Timelapse spanning full height -->
+      <!-- LEFT (33%): Timelapse spanning full height -->
       <section class="card card-map">
         <img id="timelapseImg" class="timelapse" src="" alt="Timelapse map" />
         <div id="timelapseHint" class="hint"></div>
       </section>
 
-      <!-- RIGHT TOP (65%): two charts -->
+      <!-- RIGHT TOP (67%): two charts -->
       <section class="rightTop">
         <div class="card card-tight">
           <div id="tent_chart" class="chart"></div>
@@ -40,15 +44,11 @@
         </div>
       </section>
 
-      <!-- RIGHT BOTTOM (65%): AFIR -->
+      <!-- RIGHT BOTTOM (67%): AFIR -->
       <section class="card card-afir card-tight">
         <div id="afir_chart" class="chart"></div>
       </section>
     </main>
-
-    <footer class="footer">
-      <button id="downloadBtn" class="btn">Download data (CSV)</button>
-    </footer>
 
   </div>
 

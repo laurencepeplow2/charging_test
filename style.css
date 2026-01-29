@@ -7,16 +7,15 @@
   --muted: #7b7b7b;
   --border: #d0d0d0;
 
-  /* Responsive spacing */
   --pad: clamp(10px, 1vw, 16px);
   --gap: clamp(8px, 0.9vw, 12px);
-
-  /* Tiny inset to stop bottom clipping */
   --inset: clamp(4px, 0.5vw, 8px);
+
+  /* Default chart scale (1 = normal) */
+  --chart-scale: 1;
 }
 
 *{ box-sizing: border-box; }
-
 html, body{ height: 100%; }
 
 body{
@@ -24,10 +23,9 @@ body{
   background: var(--bg);
   font-family: "effra", sans-serif;
   color: var(--text);
-  overflow: hidden; /* desktop: no page scroll */
+  overflow: hidden;
 }
 
-/* Page frame: header + dashboard fill the screen */
 .page{
   height: 100vh;
   display: grid;
@@ -49,11 +47,11 @@ body{
   line-height: 1.05;
 }
 
-/* Country + Download row */
+/* Row with Country on left, Download on right */
 .headerRow{
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
+  width: 100%;
   gap: var(--gap);
 }
 
@@ -86,15 +84,34 @@ body{
   background-repeat: no-repeat;
 }
 
+/* Button forced to far right */
+.btn{
+  margin-left: auto; /* THIS pins it to the right */
+  height: clamp(48px, 5vh, 58px);
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: #4b4b4b;
+  font-family: "effra", sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn:hover{ opacity: 0.92; }
+
 /* Dashboard layout */
 .dashboard{
   min-height: 0;
   height: 100%;
   display: grid;
-  grid-template-columns: 35% 65%;
 
-  /* Give AFIR (bottom row) a bit more height */
-  grid-template-rows: 0.42fr 0.58fr;
+  /* Reduce GIF column slightly */
+  grid-template-columns: 33% 67%;
+
+  /* Other charts should be half the page each */
+  grid-template-rows: 1fr 1fr;
 
   gap: var(--gap);
 }
@@ -103,20 +120,12 @@ body{
 .card{
   background: var(--card);
   border-radius: 14px;
-  overflow: hidden; /* clean rounded corners */
+  overflow: hidden;
   min-height: 0;
 }
 
-/* Inset wrapper prevents bottom clipping */
 .card-tight{
   padding: var(--inset);
-}
-
-.chart{
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  overflow: visible;
 }
 
 /* LEFT map spans both rows */
@@ -138,17 +147,30 @@ body{
   gap: var(--gap);
 }
 
-/* AFIR bottom-right spans full width */
+/* AFIR bottom-right */
 .card-afir{
   grid-column: 2;
   grid-row: 2;
 }
 
-/* Timelapse GIF */
+/* Chart container fills the card */
+.chart{
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+
+  /* scale entire iframe contents to “shrink fonts” on smaller screens */
+  transform: scale(var(--chart-scale));
+  transform-origin: top left;
+  width: calc(100% / var(--chart-scale));
+  height: calc(100% / var(--chart-scale));
+}
+
+/* Timelapse */
 .timelapse{
   width: 100%;
   height: 100%;
-  object-fit: cover;     /* fills the box */
+  object-fit: cover;   /* fills the box */
   object-position: center;
   display: block;
   border-radius: 10px;
@@ -163,21 +185,13 @@ body{
   padding: 8px 10px;
 }
 
-/* Button */
-.btn{
-  height: clamp(48px, 5vh, 58px); /* match the select height */
-  padding: 0 18px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: #fff;
-  color: #4b4b4b;
-  font-family: "effra", sans-serif;
-  font-size: 16px;
-  cursor: pointer;
-  white-space: nowrap;
+/* Scale charts down on smaller screens */
+@media (max-width: 1400px){
+  :root{ --chart-scale: 0.95; }
 }
-
-.btn:hover{ opacity: 0.92; }
+@media (max-width: 1200px){
+  :root{ --chart-scale: 0.90; }
+}
 
 /* Small screens: allow scroll + stack */
 @media (max-width: 1100px){
@@ -187,6 +201,10 @@ body{
   .headerRow{
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .btn{
+    margin-left: 0;
   }
 
   .dashboard{
