@@ -145,8 +145,6 @@ async function renderAfirChart() {
 }
 
 function normaliseTentLabelColumn(rows) {
-  // If the first header is blank, d3.csvParse will use "" as the column name.
-  // We'll copy it to a safe name "__label" and bind to that instead.
   const cols = rows.columns || [];
   if (!cols.length) return { rows, labelCol: null, valueCols: [] };
 
@@ -158,7 +156,6 @@ function normaliseTentLabelColumn(rows) {
     rows.forEach(r => {
       r[labelCol] = r[""];
     });
-    // Keep original "" column as-is; just bind to __label.
   }
 
   const valueCols = cols.slice(1);
@@ -283,3 +280,4 @@ init().catch(err => {
   document.getElementById("network_graph").innerHTML =
     "<p style='font-family:sans-serif'>Error loading dashboard. Check console.</p>";
 });
+

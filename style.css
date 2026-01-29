@@ -1,149 +1,219 @@
 @import url("https://use.typekit.net/pnq5gyb.css");
 
-:root {
+:root{
   --bg: #F8F3EF;
   --card: #F2EBE5;
-  --border: #a5a5a5;
+  --text: #111;
+  --muted: #7b7b7b;
+  --border: #d0d0d0;
 }
 
-* { box-sizing: border-box; }
+*{ box-sizing: border-box; }
 
-body {
+html, body{
+  height: 100%;
+}
+
+body{
   margin: 0;
-  padding: 0;
-  overflow: hidden;            /* prevents page scroll on desktop */
+  background: var(--bg);
   font-family: "effra", sans-serif;
-  font-weight: 400;
+  color: var(--text);
+  overflow: hidden; /* desktop: no page scroll */
 }
 
-#main-code,
-.main-content {
-  background-color: var(--bg);
-}
-
-/* Make the dashboard fill the viewport */
-.main-content {
+/* Page frame: header + dashboard + footer fill the screen */
+.page{
   height: 100vh;
-  padding: 14px;
   display: grid;
-  grid-template-rows: auto 1fr auto; /* header, charts grid, footer */
-  gap: 10px;
+  grid-template-rows: auto 1fr auto;
+  gap: 12px;
+  padding: 14px;
 }
 
 /* Header */
-.topbar {
-  display: flex;
-  align-items: end;
+.header{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
 }
 
-.control span {
+.page-title{
+  margin: 0;
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.05;
+}
+
+.filterRow{
+  width: 280px; /* bigger filter box like your reference */
+}
+
+.filterLabel{
   display: block;
   font-size: 14px;
-  margin-bottom: 6px;
+  color: var(--muted);
+  margin: 0 0 6px 2px;
 }
 
-select {
-  width: 220px;
-  background-color: #fff;
+.countrySelect{
+  width: 100%;
+  height: 56px;
+  border-radius: 12px;
   border: 1px solid var(--border);
-  min-height: 42px;
-  border-radius: 0.75rem;
-  padding: 0.25rem 0.75rem;
-  font-size: 1rem;
-  font-family: "effra", sans-serif;
+  background: #fff;
+  color: var(--muted);
+  font-size: 18px;
+  padding: 0 44px 0 16px;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='%234D45FF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-size: 24px;
-  background-position: right 12px center;
+  font-family: "effra", sans-serif;
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='%234D45FF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-size: 26px;
+  background-position: right 14px center;
   background-repeat: no-repeat;
 }
 
-/* Charts grid (fills available height) */
-.dash-grid {
+/* Dashboard layout:
+   Left column 35% spans 2 rows
+   Right column 65% = (top row: two charts) + (bottom row: AFIR)
+*/
+.dashboard{
+  min-height: 0;
   height: 100%;
+  display: grid;
+  grid-template-columns: 35% 65%;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Cards: grey boxes */
+.card{
+  background: var(--card);
+  border-radius: 14px;
+  overflow: hidden;     /* ensures charts touch edges */
+  min-height: 0;
+}
+
+/* Tight cards: no padding so Flourish fills the box */
+.card-tight{
+  padding: 0;
+}
+
+/* LEFT map spans both rows */
+.card-map{
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  position: relative;
+  padding: 0; /* no inner padding */
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+
+/* Right-top contains 2 cards side-by-side */
+.rightTop{
+  grid-column: 2;
+  grid-row: 1;
+  min-height: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr; /* 2 rows, equal height */
-  gap: 10px;
-  min-height: 0;              /* important so children can shrink */
+  gap: 12px;
 }
 
-/* Cards */
-.card {
-  background-color: var(--card);
-  border-radius: 12px;
-  padding: 10px;
-  min-height: 0;              /* important so inner chart can shrink */
-  display: grid;
-  grid-template-rows: auto 1fr auto; /* title, content, hint (if any) */
-  gap: 8px;
+/* AFIR bottom-right spans full width of right column */
+.card-afir{
+  grid-column: 2;
+  grid-row: 2;
 }
 
-.card-title {
-  font-size: 15px;
-}
-
-.chart {
-  width: 100%;
-  height: 100%;               /* chart fills the card’s content area */
-  min-height: 0;
-}
-
-/* Timelapse */
-.mediaWrap {
+/* Flourish containers must fill their card */
+.chart{
   width: 100%;
   height: 100%;
   min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.timelapse {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
+/* Timelapse image:
+   - contain = no cropping
+   - set to fill available area without extra padding
+   - rendering hints to reduce blur where possible
+*/
+.timelapse{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
   display: block;
-  border-radius: 10px;
+
+  /* rendering hints (browser-dependent) */
+  image-rendering: auto;
+  image-rendering: -webkit-optimize-contrast;
+  transform: translateZ(0);
 }
 
-.hint {
+.hint{
   font-size: 12px;
-  opacity: 0.8;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: #6f6f6f;
+  padding: 8px 10px;
+  background: rgba(242,235,229,0.8);
 }
 
 /* Footer */
-.footerbar {
+.footer{
   display: flex;
   justify-content: flex-end;
   align-items: center;
 }
 
-.btn {
-  font-family: "effra", sans-serif;
-  background-color: transparent;
+.btn{
+  height: 50px;
+  padding: 0 18px;
+  border-radius: 12px;
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  padding: 10px 14px;
+  background: #fff;
+  color: #4b4b4b;
+  font-family: "effra", sans-serif;
+  font-size: 16px;
   cursor: pointer;
 }
 
-.btn:hover {
-  opacity: 0.9;
+.btn:hover{
+  opacity: 0.92;
 }
 
-/* Small screens: allow scrolling + stack */
-@media (max-width: 980px) {
-  body { overflow: auto; }
-  .main-content { height: auto; }
-  .dash-grid {
+/* Small screens: allow scroll + stack */
+@media (max-width: 1100px){
+  body{ overflow: auto; }
+
+  .page{
+    height: auto;
+  }
+
+  .dashboard{
     grid-template-columns: 1fr;
     grid-template-rows: auto;
   }
-  select { width: 100%; }
-  .card { min-height: 420px; }
+
+  .card-map{
+    grid-column: auto;
+    grid-row: auto;
+    min-height: 420px;
+  }
+
+  .rightTop{
+    grid-column: auto;
+    grid-row: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .card-afir{
+    grid-column: auto;
+    grid-row: auto;
+    min-height: 420px;
+  }
+
+  .filterRow{
+    width: 100%;
+    max-width: 420px;
+  }
 }

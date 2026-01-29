@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Charging dashboard (trial)</title>
+  <title>Charging dashboard</title>
 
   <link rel="stylesheet" href="./style.css" />
 
@@ -11,46 +11,44 @@
 </head>
 
 <body id="main-code">
-  <div class="main-content">
+  <div class="page">
 
-    <!-- Header -->
-    <div class="topbar">
-      <label class="control">
-        <span>Country</span>
-        <select id="countrySelect"></select>
-      </label>
-    </div>
+    <header class="header">
+      <h1 class="page-title">Progress Report for TenT &amp; AFIR Charging Targets</h1>
 
-    <!-- 2x2 grid that fits the screen -->
-    <div class="dash-grid">
-      <div class="card">
-        <div class="card-title">Charging points (stacked) + BEV fleet (line)</div>
-        <div id="network_graph" class="chart"></div>
+      <div class="filterRow">
+        <label class="filterLabel" for="countrySelect">Country</label>
+        <select id="countrySelect" class="countrySelect"></select>
       </div>
+    </header>
 
-      <div class="card">
-        <div class="card-title">Timelapse</div>
-        <div class="mediaWrap">
-          <img id="timelapseImg" class="timelapse" src="" alt="Timelapse" />
-        </div>
+    <main class="dashboard">
+      <!-- LEFT (35%): Map / Timelapse spanning full height -->
+      <section class="card card-map">
+        <img id="timelapseImg" class="timelapse" src="" alt="Timelapse map" />
         <div id="timelapseHint" class="hint"></div>
-      </div>
+      </section>
 
-      <div class="card">
-        <div class="card-title">AFIR compliance</div>
+      <!-- RIGHT TOP (65%): two charts -->
+      <section class="rightTop">
+        <div class="card card-tight">
+          <div id="tent_chart" class="chart"></div>
+        </div>
+
+        <div class="card card-tight">
+          <div id="network_graph" class="chart"></div>
+        </div>
+      </section>
+
+      <!-- RIGHT BOTTOM (65%): AFIR -->
+      <section class="card card-afir card-tight">
         <div id="afir_chart" class="chart"></div>
-      </div>
+      </section>
+    </main>
 
-      <div class="card">
-        <div class="card-title">TEN-T historic coverage</div>
-        <div id="tent_chart" class="chart"></div>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="footerbar">
+    <footer class="footer">
       <button id="downloadBtn" class="btn">Download data (CSV)</button>
-    </div>
+    </footer>
 
   </div>
 
