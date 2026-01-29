@@ -6,13 +6,18 @@
   --text: #111;
   --muted: #7b7b7b;
   --border: #d0d0d0;
+
+  /* Responsive spacing */
+  --pad: clamp(10px, 1vw, 16px);
+  --gap: clamp(8px, 0.9vw, 12px);
+
+  /* Tiny inset to stop bottom clipping (keeps “edge-to-edge” feel) */
+  --inset: clamp(4px, 0.5vw, 8px);
 }
 
 *{ box-sizing: border-box; }
 
-html, body{
-  height: 100%;
-}
+html, body{ height: 100%; }
 
 body{
   margin: 0;
@@ -22,31 +27,29 @@ body{
   overflow: hidden; /* desktop: no page scroll */
 }
 
-/* Page frame: header + dashboard + footer fill the screen */
 .page{
   height: 100vh;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  gap: 12px;
-  padding: 14px;
+  gap: var(--gap);
+  padding: var(--pad);
 }
 
 /* Header */
 .header{
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
+  gap: calc(var(--gap) * 0.7);
 }
 
 .page-title{
   margin: 0;
-  font-size: 34px;
+  font-size: clamp(22px, 2.2vw, 34px);
   font-weight: 600;
   line-height: 1.05;
 }
 
 .filterRow{
-  width: 280px; /* bigger filter box like your reference */
+  width: clamp(240px, 22vw, 320px);
 }
 
 .filterLabel{
@@ -58,12 +61,12 @@ body{
 
 .countrySelect{
   width: 100%;
-  height: 56px;
+  height: clamp(48px, 5vh, 58px);
   border-radius: 12px;
   border: 1px solid var(--border);
   background: #fff;
   color: var(--muted);
-  font-size: 18px;
+  font-size: clamp(16px, 1.1vw, 18px);
   padding: 0 44px 0 16px;
   appearance: none;
   font-family: "effra", sans-serif;
@@ -74,79 +77,80 @@ body{
   background-repeat: no-repeat;
 }
 
-/* Dashboard layout:
-   Left column 35% spans 2 rows
-   Right column 65% = (top row: two charts) + (bottom row: AFIR)
-*/
+/* Dashboard layout */
 .dashboard{
   min-height: 0;
   height: 100%;
   display: grid;
   grid-template-columns: 35% 65%;
-  grid-template-rows: 1fr 1fr;
-  gap: 12px;
+
+  /* Give AFIR (bottom row) a bit more height to avoid crowding */
+  grid-template-rows: 0.42fr 0.58fr;
+
+  gap: var(--gap);
 }
 
-/* Cards: grey boxes */
+/* Cards */
 .card{
   background: var(--card);
   border-radius: 14px;
-  overflow: hidden;     /* ensures charts touch edges */
+  overflow: hidden;  /* keeps clean rounded corners */
   min-height: 0;
 }
 
-/* Tight cards: no padding so Flourish fills the box */
+/* Key trick: inset wrapper prevents bottom clipping by rounded corners */
 .card-tight{
-  padding: 0;
+  padding: var(--inset);
+}
+
+/* Inner fill area (so content still feels “edge-to-edge”) */
+.chart{
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+
+  /* Important: ensure the iframe doesn't overflow and get clipped weirdly */
+  overflow: visible;
 }
 
 /* LEFT map spans both rows */
 .card-map{
   grid-column: 1;
   grid-row: 1 / span 2;
-  position: relative;
-  padding: 0; /* no inner padding */
   display: grid;
   grid-template-rows: 1fr auto;
+  padding: var(--inset);
 }
 
-/* Right-top contains 2 cards side-by-side */
+/* Right-top contains 2 charts */
 .rightTop{
   grid-column: 2;
   grid-row: 1;
   min-height: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: var(--gap);
 }
 
-/* AFIR bottom-right spans full width of right column */
+/* AFIR bottom-right spans full width */
 .card-afir{
   grid-column: 2;
   grid-row: 2;
 }
 
-/* Flourish containers must fill their card */
-.chart{
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-}
-
-/* Timelapse image:
-   - contain = no cropping
-   - set to fill available area without extra padding
-   - rendering hints to reduce blur where possible
-*/
+/* Timelapse GIF – fill box + reduce blur */
 .timelapse{
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  object-position: center;
-  display: block;
 
-  /* rendering hints (browser-dependent) */
-  image-rendering: auto;
+  /* Fill the box (no borders). If you prefer no cropping, change to contain. */
+  object-fit: cover;
+  object-position: center;
+
+  display: block;
+  border-radius: 10px;
+
+  /* Rendering hints (browser dependent) */
   image-rendering: -webkit-optimize-contrast;
   transform: translateZ(0);
 }
@@ -155,7 +159,6 @@ body{
   font-size: 12px;
   color: #6f6f6f;
   padding: 8px 10px;
-  background: rgba(242,235,229,0.8);
 }
 
 /* Footer */
@@ -166,7 +169,7 @@ body{
 }
 
 .btn{
-  height: 50px;
+  height: clamp(44px, 5vh, 50px);
   padding: 0 18px;
   border-radius: 12px;
   border: 1px solid var(--border);
@@ -177,17 +180,12 @@ body{
   cursor: pointer;
 }
 
-.btn:hover{
-  opacity: 0.92;
-}
+.btn:hover{ opacity: 0.92; }
 
 /* Small screens: allow scroll + stack */
 @media (max-width: 1100px){
   body{ overflow: auto; }
-
-  .page{
-    height: auto;
-  }
+  .page{ height: auto; }
 
   .dashboard{
     grid-template-columns: 1fr;
