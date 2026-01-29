@@ -11,7 +11,7 @@
   --pad: clamp(10px, 1vw, 16px);
   --gap: clamp(8px, 0.9vw, 12px);
 
-  /* Tiny inset to stop bottom clipping (keeps “edge-to-edge” feel) */
+  /* Tiny inset to stop bottom clipping */
   --inset: clamp(4px, 0.5vw, 8px);
 }
 
@@ -27,10 +27,11 @@ body{
   overflow: hidden; /* desktop: no page scroll */
 }
 
+/* Page frame: header + dashboard fill the screen */
 .page{
   height: 100vh;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr; /* header, dashboard */
   gap: var(--gap);
   padding: var(--pad);
 }
@@ -46,6 +47,14 @@ body{
   font-size: clamp(22px, 2.2vw, 34px);
   font-weight: 600;
   line-height: 1.05;
+}
+
+/* Country + Download row */
+.headerRow{
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--gap);
 }
 
 .filterRow{
@@ -84,7 +93,7 @@ body{
   display: grid;
   grid-template-columns: 35% 65%;
 
-  /* Give AFIR (bottom row) a bit more height to avoid crowding */
+  /* Give AFIR (bottom row) a bit more height */
   grid-template-rows: 0.42fr 0.58fr;
 
   gap: var(--gap);
@@ -94,22 +103,19 @@ body{
 .card{
   background: var(--card);
   border-radius: 14px;
-  overflow: hidden;  /* keeps clean rounded corners */
+  overflow: hidden; /* clean rounded corners */
   min-height: 0;
 }
 
-/* Key trick: inset wrapper prevents bottom clipping by rounded corners */
+/* Inset wrapper prevents bottom clipping */
 .card-tight{
   padding: var(--inset);
 }
 
-/* Inner fill area (so content still feels “edge-to-edge”) */
 .chart{
   width: 100%;
   height: 100%;
   min-height: 0;
-
-  /* Important: ensure the iframe doesn't overflow and get clipped weirdly */
   overflow: visible;
 }
 
@@ -138,19 +144,15 @@ body{
   grid-row: 2;
 }
 
-/* Timelapse GIF – fill box + reduce blur */
+/* Timelapse GIF */
 .timelapse{
   width: 100%;
   height: 100%;
-
-  /* Fill the box (no borders). If you prefer no cropping, change to contain. */
-  object-fit: cover;
+  object-fit: cover;     /* fills the box */
   object-position: center;
-
   display: block;
   border-radius: 10px;
 
-  /* Rendering hints (browser dependent) */
   image-rendering: -webkit-optimize-contrast;
   transform: translateZ(0);
 }
@@ -161,15 +163,9 @@ body{
   padding: 8px 10px;
 }
 
-/* Footer */
-.footer{
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
-
+/* Button */
 .btn{
-  height: clamp(44px, 5vh, 50px);
+  height: clamp(48px, 5vh, 58px); /* match the select height */
   padding: 0 18px;
   border-radius: 12px;
   border: 1px solid var(--border);
@@ -178,6 +174,7 @@ body{
   font-family: "effra", sans-serif;
   font-size: 16px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .btn:hover{ opacity: 0.92; }
@@ -186,6 +183,11 @@ body{
 @media (max-width: 1100px){
   body{ overflow: auto; }
   .page{ height: auto; }
+
+  .headerRow{
+    flex-direction: column;
+    align-items: stretch;
+  }
 
   .dashboard{
     grid-template-columns: 1fr;
