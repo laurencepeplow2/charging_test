@@ -7,10 +7,11 @@
   --muted: #7b7b7b;
   --border: #d0d0d0;
 
-  --pad: clamp(10px, 1vw, 16px);
-  --gap: clamp(8px, 0.9vw, 12px);
-  --inset: clamp(4px, 0.5vw, 8px);
+  /* Halved page padding + gaps */
+  --pad: clamp(5px, 0.5vw, 8px);
+  --gap: clamp(4px, 0.45vw, 6px);
 
+  --inset: clamp(4px, 0.5vw, 8px);
   --chart-scale: 1;
 }
 
@@ -193,11 +194,11 @@ body{
 
   .btn{
     margin-left: 0;
-    height: 40px; /* usable on mobile */
+    height: 40px;
   }
 
   .countrySelect{
-    height: 44px; /* usable on mobile */
+    height: 44px;
   }
 
   .dashboard{
