@@ -2,9 +2,10 @@
 const API_KEY = "QjDqiYcwNRvCwZLiIDj50O-fvzAyGcadaOG091tD52t0hul3TA1b5ZXLKoNCe2NI";
 
 // ----- Flourish templates -----
-const FILTERED_VISUALISATION_ID = "27380474"; // combo chart template (BEV line + bars)
-const AFIR_VISUALISATION_ID = "27423802";     // AFIR chart template
-const TENT_VISUALISATION_ID = "27424153";     // TEN-T chart template
+const FILTERED_VISUALISATION_ID = "27380474";
+const AFIR_VISUALISATION_ID = "27423802";
+const TENT_VISUALISATION_ID = "27424153";
+
 
 // ----- CSV files (in repo root) -----
 const MAIN_CSV_PATH = "./input_data.csv";
@@ -27,14 +28,12 @@ const AFIR_COL_AREA = "Area";
 // DOM
 const countrySelect = document.getElementById("countrySelect");
 const downloadBtn = document.getElementById("downloadBtn");
-const timelapseImg = document.getElementById("timelapseImg");
-const timelapseHint = document.getElementById("timelapseHint");
-const gifToggle = document.getElementById("gifToggle");
-const gifCanvas = document.getElementById("gifCanvas");
+const timelapseVideo = document.getElementById("timelapseVideo");
+const toggleBtn = document.getElementById("gifToggle");
 
-// GIF control
-let gifIsPlaying = true;
-let currentGifBaseSrc = "";
+// Video control
+let videoIsPlaying = true;
+let currentVideoBaseSrc = "";
 
 // Data
 let mainRows = [];
@@ -64,15 +63,20 @@ function rowsToCsv(rows, columns) {
 }
 
 function setTimelapse(country) {
-  currentGifBaseSrc = `./timelapse/${country}.gif`;
+  // Convention: timelapse/<Country>.mp4 (e.g. timelapse/EU.mp4)
+  currentVideoBaseSrc = `./timelapse/${country}.mp4`;
 
-  // Reset to playing view
-  timelapseImg.style.display = "block";
-  gifCanvas.style.display = "none";
-  gifIsPlaying = true;
-  gifToggle.textContent = "❚❚";
-  gifToggle.setAttribute("aria-label", "Pause");
+  // Load and play (true play/pause supported)
+  timelapseVideo.src = currentVideoBaseSrc;
+  timelapseVideo.loop = true;
+  timelapseVideo.muted = true;
+  timelapseVideo.playsInline = true;
 
+  // ensure it starts playing when changed
+  timelapseVideo.play().catch(() => {});
+  videoIsPlaying = true;
+  toggleBtn.textContent = "❚❚";
+  toggleBtn.setAttribute("aria-label", "Pause");
 }
 
 async function renderFilteredChart(filteredRows) {
@@ -80,8 +84,6 @@ async function renderFilteredChart(filteredRows) {
     `https://public.flourish.studio/visualisation/${FILTERED_VISUALISATION_ID}/visualisation.json`
   ).then(res => res.json());
 
-  // IMPORTANT ORDER:
-  // BEV first (line), then AC/DC (stacked columns) — relies on your template being a combo chart.
   const bindings = {
     data: {
       label: COL_PERIOD,
@@ -90,7 +92,6 @@ async function renderFilteredChart(filteredRows) {
     }
   };
 
-  // Keep template settings; just enforce stacking for column series.
   const state = {
     ...configJson.state,
     axes: {
@@ -215,7 +216,7 @@ async function renderForCountry(country) {
 }
 
 async function init() {
-  // ---- Load main CSV (filtered chart + gif) ----
+  // ---- Load main CSV ----
   const mainText = await fetch(MAIN_CSV_PATH).then(res => res.text());
   mainRows = d3.csvParse(mainText);
 
@@ -255,40 +256,18 @@ async function init() {
     URL.revokeObjectURL(url);
   });
 
-  // GIF pause/play toggle
-  gifToggle.addEventListener("click", () => {
-    if (gifIsPlaying) {
-      // Pause: freeze current rendered frame into canvas
-      const rect = timelapseImg.getBoundingClientRect();
-      const w = Math.max(1, Math.floor(rect.width));
-      const h = Math.max(1, Math.floor(rect.height));
-
-      gifCanvas.width = w;
-      gifCanvas.height = h;
-
-      const ctx = gifCanvas.getContext("2d");
-      try {
-        ctx.drawImage(timelapseImg, 0, 0, w, h);
-        gifCanvas.style.display = "block";
-        timelapseImg.style.display = "none";
-
-        gifIsPlaying = false;
-        gifToggle.textContent = "▶";
-        gifToggle.setAttribute("aria-label", "Play");
-      } catch (e) {
-        console.error("Could not pause GIF:", e);
-      }
+  // True pause/resume for video
+  toggleBtn.addEventListener("click", () => {
+    if (videoIsPlaying) {
+      timelapseVideo.pause();
+      videoIsPlaying = false;
+      toggleBtn.textContent = "▶";
+      toggleBtn.setAttribute("aria-label", "Play");
     } else {
-      // Play: show GIF again; GIF will restart (GIFs can't truly resume)
-      gifCanvas.style.display = "none";
-      timelapseImg.style.display = "block";
-
-      // cache-bust to restart animation
-      timelapseImg.src = `${currentGifBaseSrc}?t=${Date.now()}`;
-
-      gifIsPlaying = true;
-      gifToggle.textContent = "❚❚";
-      gifToggle.setAttribute("aria-label", "Pause");
+      timelapseVideo.play().catch(() => {});
+      videoIsPlaying = true;
+      toggleBtn.textContent = "❚❚";
+      toggleBtn.setAttribute("aria-label", "Pause");
     }
   });
 
@@ -316,7 +295,7 @@ async function init() {
     await renderTentChart();
   }
 
-  // ---- First render for filtered components ----
+  // First render
   await renderForCountry(defaultCountry);
 }
 

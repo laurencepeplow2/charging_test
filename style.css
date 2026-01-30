@@ -7,7 +7,7 @@
   --muted: #7b7b7b;
   --border: #d0d0d0;
 
-  /* Reduced again (about half) */
+  /* tight spacing */
   --pad: clamp(3px, 0.25vw, 4px);
   --gap: clamp(2px, 0.22vw, 3px);
 
@@ -29,7 +29,7 @@ body{
 .page{
   height: 100vh;
   display: grid;
-  grid-template-rows: auto 1fr; /* header, dashboard */
+  grid-template-rows: auto 1fr;
   gap: var(--gap);
   padding: var(--pad);
 }
@@ -47,7 +47,6 @@ body{
   line-height: 1.05;
 }
 
-/* Row with select on left, download on right */
 .headerRow{
   display: flex;
   align-items: flex-end;
@@ -59,7 +58,6 @@ body{
   width: clamp(220px, 20vw, 300px);
 }
 
-/* Half-height select */
 .countrySelect{
   width: 100%;
   height: clamp(24px, 2.5vh, 29px);
@@ -78,7 +76,6 @@ body{
   background-repeat: no-repeat;
 }
 
-/* Half-height button pinned right */
 .btn{
   margin-left: auto;
   height: clamp(24px, 2.5vh, 29px);
@@ -92,7 +89,6 @@ body{
   cursor: pointer;
   white-space: nowrap;
 }
-
 .btn:hover{ opacity: 0.92; }
 
 /* Dashboard layout */
@@ -101,8 +97,8 @@ body{
   height: 100%;
   display: grid;
 
-  /* slightly narrower GIF column */
-  grid-template-columns: 33% 67%;
+  /* LHS a bit wider */
+  grid-template-columns: 38% 62%;
 
   /* top row 65%, bottom row 35% */
   grid-template-rows: 0.65fr 0.35fr;
@@ -122,57 +118,40 @@ body{
   padding: var(--inset);
 }
 
-/* Flourish container */
 .chart{
   width: 100%;
   height: 100%;
   min-height: 0;
 
-  /* scale to reduce “effective font size” on smaller screens */
   transform: scale(var(--chart-scale));
   transform-origin: top left;
   width: calc(100% / var(--chart-scale));
   height: calc(100% / var(--chart-scale));
 }
 
-/* LEFT map spans both rows */
+/* LEFT media spans both rows */
 .card-map{
   grid-column: 1;
   grid-row: 1 / span 2;
-  display: grid;
-  grid-template-rows: 1fr auto;
   padding: var(--inset);
   min-height: 0;
 }
 
-/* GIF wrapper fills card */
-.gifWrap{
+/* Video wrapper */
+.mediaWrap{
   position: relative;
   width: 100%;
   height: 100%;
   min-height: 0;
 }
 
-/* Timelapse */
-.timelapse{
+/* MP4 fills the box cleanly */
+.timelapseVideo{
   width: 100%;
   height: 100%;
-  object-fit: cover;     /* fills the grey box */
-  object-position: center;
   display: block;
-  border-radius: 10px;
-
-  image-rendering: -webkit-optimize-contrast;
-  transform: translateZ(0);
-}
-
-/* Canvas shown when paused (freezes current frame) */
-.gifCanvas{
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: none;
+  object-fit: cover;
+  object-position: center;
   border-radius: 10px;
 }
 
@@ -193,16 +172,7 @@ body{
   place-items: center;
   backdrop-filter: blur(4px);
 }
-.gifToggle:hover{
-  background: rgba(0,0,0,0.45);
-}
-
-/* hint row */
-.hint{
-  font-size: 12px;
-  color: #6f6f6f;
-  padding: 6px 8px;
-}
+.gifToggle:hover{ background: rgba(0,0,0,0.45); }
 
 /* Right-top contains 2 charts */
 .rightTop{

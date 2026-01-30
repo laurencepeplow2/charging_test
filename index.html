@@ -14,7 +14,7 @@
   <div class="page">
 
     <header class="header">
-      <h1 class="page-title">Progress Report for Cars TenT &amp; AFIR Charging Targets</h1>
+      <h1 class="page-title">Progress Report for TenT &amp; AFIR Charging Targets</h1>
 
       <div class="headerRow">
         <div class="filterRow">
@@ -26,19 +26,23 @@
     </header>
 
     <main class="dashboard">
-      <!-- LEFT (33%): Timelapse spanning full height with play/pause overlay -->
+      <!-- LEFT: Timelapse MP4 spanning full height with play/pause overlay -->
       <section class="card card-map">
-        <div class="gifWrap">
-          <img id="timelapseImg" class="timelapse" src="" alt="Timelapse map" />
-          <canvas id="gifCanvas" class="gifCanvas"></canvas>
+        <div class="mediaWrap">
+          <video
+            id="timelapseVideo"
+            class="timelapseVideo"
+            muted
+            playsinline
+            autoplay
+            loop
+          ></video>
 
           <button id="gifToggle" class="gifToggle" aria-label="Pause">❚❚</button>
         </div>
-
-        <div id="timelapseHint" class="hint"></div>
       </section>
 
-      <!-- RIGHT TOP (67%): two charts -->
+      <!-- RIGHT TOP: two charts -->
       <section class="rightTop">
         <div class="card card-tight">
           <div id="tent_chart" class="chart"></div>
@@ -49,7 +53,7 @@
         </div>
       </section>
 
-      <!-- RIGHT BOTTOM (67%): AFIR -->
+      <!-- RIGHT BOTTOM: AFIR -->
       <section class="card card-afir card-tight">
         <div id="afir_chart" class="chart"></div>
       </section>
