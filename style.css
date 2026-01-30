@@ -98,7 +98,7 @@ body{
   display: grid;
 
   /* LHS a bit wider */
-  grid-template-columns: 34% 66%;
+  grid-template-columns: 36% 64%;
 
   /* top row 65%, bottom row 35% */
   grid-template-rows: 0.65fr 0.35fr;
