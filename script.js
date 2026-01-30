@@ -73,6 +73,7 @@ function setTimelapse(country) {
   gifToggle.textContent = "❚❚";
   gifToggle.setAttribute("aria-label", "Pause");
 
+}
 
 async function renderFilteredChart(filteredRows) {
   const configJson = await fetch(
