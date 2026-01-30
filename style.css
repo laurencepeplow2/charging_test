@@ -7,9 +7,9 @@
   --muted: #7b7b7b;
   --border: #d0d0d0;
 
-  /* Halved page padding + gaps */
-  --pad: clamp(5px, 0.5vw, 8px);
-  --gap: clamp(4px, 0.45vw, 6px);
+  /* Reduced again (about half) */
+  --pad: clamp(3px, 0.25vw, 4px);
+  --gap: clamp(2px, 0.22vw, 3px);
 
   --inset: clamp(4px, 0.5vw, 8px);
   --chart-scale: 1;
@@ -42,7 +42,7 @@ body{
 
 .page-title{
   margin: 0;
-  font-size: clamp(22px, 2.2vw, 34px);
+  font-size: clamp(20px, 2.0vw, 32px);
   font-weight: 600;
   line-height: 1.05;
 }
@@ -56,7 +56,7 @@ body{
 }
 
 .filterRow{
-  width: clamp(240px, 22vw, 320px);
+  width: clamp(220px, 20vw, 300px);
 }
 
 /* Half-height select */
@@ -101,7 +101,10 @@ body{
   height: 100%;
   display: grid;
 
+  /* slightly narrower GIF column */
   grid-template-columns: 33% 67%;
+
+  /* top row 65%, bottom row 35% */
   grid-template-rows: 0.65fr 0.35fr;
 
   gap: var(--gap);
@@ -119,11 +122,13 @@ body{
   padding: var(--inset);
 }
 
+/* Flourish container */
 .chart{
   width: 100%;
   height: 100%;
   min-height: 0;
 
+  /* scale to reduce “effective font size” on smaller screens */
   transform: scale(var(--chart-scale));
   transform-origin: top left;
   width: calc(100% / var(--chart-scale));
@@ -137,6 +142,66 @@ body{
   display: grid;
   grid-template-rows: 1fr auto;
   padding: var(--inset);
+  min-height: 0;
+}
+
+/* GIF wrapper fills card */
+.gifWrap{
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+/* Timelapse */
+.timelapse{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;     /* fills the grey box */
+  object-position: center;
+  display: block;
+  border-radius: 10px;
+
+  image-rendering: -webkit-optimize-contrast;
+  transform: translateZ(0);
+}
+
+/* Canvas shown when paused (freezes current frame) */
+.gifCanvas{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  border-radius: 10px;
+}
+
+/* Play/pause overlay */
+.gifToggle{
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.65);
+  background: rgba(0,0,0,0.35);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(4px);
+}
+.gifToggle:hover{
+  background: rgba(0,0,0,0.45);
+}
+
+/* hint row */
+.hint{
+  font-size: 12px;
+  color: #6f6f6f;
+  padding: 6px 8px;
 }
 
 /* Right-top contains 2 charts */
@@ -153,25 +218,6 @@ body{
 .card-afir{
   grid-column: 2;
   grid-row: 2;
-}
-
-/* Timelapse */
-.timelapse{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  border-radius: 10px;
-
-  image-rendering: -webkit-optimize-contrast;
-  transform: translateZ(0);
-}
-
-.hint{
-  font-size: 12px;
-  color: #6f6f6f;
-  padding: 8px 10px;
 }
 
 /* Scale charts down on smaller screens */

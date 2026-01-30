@@ -26,9 +26,15 @@
     </header>
 
     <main class="dashboard">
-      <!-- LEFT (33%): Timelapse spanning full height -->
+      <!-- LEFT (33%): Timelapse spanning full height with play/pause overlay -->
       <section class="card card-map">
-        <img id="timelapseImg" class="timelapse" src="" alt="Timelapse map" />
+        <div class="gifWrap">
+          <img id="timelapseImg" class="timelapse" src="" alt="Timelapse map" />
+          <canvas id="gifCanvas" class="gifCanvas"></canvas>
+
+          <button id="gifToggle" class="gifToggle" aria-label="Pause">❚❚</button>
+        </div>
+
         <div id="timelapseHint" class="hint"></div>
       </section>
 

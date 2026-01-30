@@ -6,7 +6,6 @@ const FILTERED_VISUALISATION_ID = "27380474"; // combo chart template (BEV line 
 const AFIR_VISUALISATION_ID = "27423802";     // AFIR chart template
 const TENT_VISUALISATION_ID = "27424153";     // TEN-T chart template
 
-
 // ----- CSV files (in repo root) -----
 const MAIN_CSV_PATH = "./input_data.csv";
 const AFIR_CSV_PATH = "./AFIR_compliance.csv";
@@ -30,6 +29,12 @@ const countrySelect = document.getElementById("countrySelect");
 const downloadBtn = document.getElementById("downloadBtn");
 const timelapseImg = document.getElementById("timelapseImg");
 const timelapseHint = document.getElementById("timelapseHint");
+const gifToggle = document.getElementById("gifToggle");
+const gifCanvas = document.getElementById("gifCanvas");
+
+// GIF control
+let gifIsPlaying = true;
+let currentGifBaseSrc = "";
 
 // Data
 let mainRows = [];
@@ -59,9 +64,16 @@ function rowsToCsv(rows, columns) {
 }
 
 function setTimelapse(country) {
-  // Convention: timelapse/<Country>.gif (e.g. timelapse/EU.gif)
-  const src = `./timelapse/${country}.gif`;
-  timelapseImg.src = src;
+  currentGifBaseSrc = `./timelapse/${country}.gif`;
+
+  // Reset to playing view
+  timelapseImg.style.display = "block";
+  gifCanvas.style.display = "none";
+  gifIsPlaying = true;
+  gifToggle.textContent = "❚❚";
+  gifToggle.setAttribute("aria-label", "Pause");
+
+  timelapseImg.src = currentGifBaseSrc;
   timelapseHint.textContent = `Showing: timelapse/${country}.gif`;
 
   timelapseImg.onerror = () => {
@@ -221,6 +233,7 @@ async function init() {
     return;
   }
 
+  // Populate filter
   const countries = uniq(mainRows.map(r => r[COL_COUNTRY])).sort();
   countrySelect.innerHTML = countries.map(c => `<option value="${c}">${c}</option>`).join("");
   const defaultCountry = countries[0] || "EU";
@@ -230,6 +243,7 @@ async function init() {
     await renderForCountry(countrySelect.value);
   });
 
+  // Download filtered main data only
   downloadBtn.addEventListener("click", () => {
     const country = countrySelect.value;
     const filtered = mainRows.filter(r => (r[COL_COUNTRY] ?? "").toString() === country);
@@ -245,6 +259,43 @@ async function init() {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+  });
+
+  // GIF pause/play toggle
+  gifToggle.addEventListener("click", () => {
+    if (gifIsPlaying) {
+      // Pause: freeze current rendered frame into canvas
+      const rect = timelapseImg.getBoundingClientRect();
+      const w = Math.max(1, Math.floor(rect.width));
+      const h = Math.max(1, Math.floor(rect.height));
+
+      gifCanvas.width = w;
+      gifCanvas.height = h;
+
+      const ctx = gifCanvas.getContext("2d");
+      try {
+        ctx.drawImage(timelapseImg, 0, 0, w, h);
+        gifCanvas.style.display = "block";
+        timelapseImg.style.display = "none";
+
+        gifIsPlaying = false;
+        gifToggle.textContent = "▶";
+        gifToggle.setAttribute("aria-label", "Play");
+      } catch (e) {
+        console.error("Could not pause GIF:", e);
+      }
+    } else {
+      // Play: show GIF again; GIF will restart (GIFs can't truly resume)
+      gifCanvas.style.display = "none";
+      timelapseImg.style.display = "block";
+
+      // cache-bust to restart animation
+      timelapseImg.src = `${currentGifBaseSrc}?t=${Date.now()}`;
+
+      gifIsPlaying = true;
+      gifToggle.textContent = "❚❚";
+      gifToggle.setAttribute("aria-label", "Pause");
+    }
   });
 
   // ---- Load AFIR CSV (unfiltered) ----
@@ -280,4 +331,3 @@ init().catch(err => {
   document.getElementById("network_graph").innerHTML =
     "<p style='font-family:sans-serif'>Error loading dashboard. Check console.</p>";
 });
-
