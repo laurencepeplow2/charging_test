@@ -102,7 +102,7 @@ body{
   display: grid;
 
   /* slightly narrower GIF column */
-  grid-template-columns: 37% 63%;
+  grid-template-columns: 33% 67%;
 
   /* top row 65%, bottom row 35% */
   grid-template-rows: 0.65fr 0.35fr;
